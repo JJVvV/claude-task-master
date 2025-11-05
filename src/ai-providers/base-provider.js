@@ -9,6 +9,7 @@ import {
 } from 'ai';
 import { jsonrepair } from 'jsonrepair';
 import { log } from '../../scripts/modules/utils.js';
+import { EnvHttpProxyAgent } from 'undici';
 
 /**
  * Base class for all AI providers
@@ -46,6 +47,21 @@ export class BaseAIProvider {
 		if (!params.apiKey) {
 			throw new Error(`${this.name} API key is required`);
 		}
+	}
+
+	/**
+	 * Creates a custom fetch function with proxy support.
+	 * Automatically reads http_proxy/https_proxy environment variables.
+	 * @returns {Function} Custom fetch function with proxy support
+	 */
+	createProxyFetch() {
+		const proxyAgent = new EnvHttpProxyAgent();
+		return (url, options = {}) => {
+			return fetch(url, {
+				...options,
+				dispatcher: proxyAgent
+			});
+		};
 	}
 
 	/**
